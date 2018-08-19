@@ -2,4 +2,5 @@ server:
   port: 31031
 sse:
   server:
-    url:  http://localhost:32032/quote
+    #url:  http://localhost:32032/quote
+    url:  http://sseservice:32032/quote

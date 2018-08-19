@@ -1,0 +1,15 @@
+version: '2.1'
+
+services:
+    sseclient:
+        image: r82anand/sseclient
+        ports:
+            - "31031:31031"
+        environment:
+            - SSESERVICE_CONTAINER_NAME=sseclient
+        depends_on:
+            - sseservice
+    sseservice:
+        image: r82anand/sseservice
+        ports:
+            - "32032:32032"
