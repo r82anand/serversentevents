@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<link rel="stylesheet"
+	href="//fonts.googleapis.com/css?family=Raleway:400,300,600" />
+<link rel="stylesheet"
+	href="//cdnjs.cloudflare.com/ajax/libs/normalize/4.0.0/normalize.min.css" />
+<link rel="stylesheet"
+	href="//cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" />
+<title>Server Sent Client Application</title>
+<style>
+h1.neon {
+	color: #0000FF;
+	text-shadow: 0 0 5px #A5F1FF, 0 0 10px #A5F1FF, 0 0 20px #A5F1FF, 0 0
+		30px #A5F1FF, 0 0 40px #A5F1FF;
+	text-align: center;
+}
+
+hr {
+	display: block;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: auto;
+	margin-right: auto;
+	border-style: inset;
+	border-width: 1px;
+	border-color: rgb(30, 144, 255);
+}
+
+hr.style-two {
+	border: 0;
+	height: 1px;
+	background-image: linear-gradient(to right, rgba(0, 0, 0, 0),
+		rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+}
+
+hr.style-three {
+	height: 15px;
+	border: 0;
+	box-shadow: inset 0 12px 12px -12px rgb(30, 144, 255);
+}
+
+span#footertext {
+	color: rgb(153, 153, 153);
+}
+</style>
+<style style="text/css">
+.hoverTable {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.hoverTable td {
+	padding: 7px;
+	border: #4e95f4 1px solid;
+}
+/* Define the default color for all the table rows */
+.hoverTable tr {
+	background: #b8d1f3;
+}
+/* Define the hover highlight color for the table row */
+.hoverTable tr:hover {
+	background-color: #ffff99;
+}
+</style>
+<style>
+body {
+	margin: 0;
+}
+
+ul.topnav {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	background-color: #333;
+}
+
+ul.topnav li {
+	float: left;
+}
+
+ul.topnav li a {
+	display: inline-block;
+	color: #f2f2f2;
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+	transition: 0.3s;
+	font-size: 17px;
+}
+
+ul.topnav li a:hover {
+	background-color: #555;
+}
+
+ul.topnav li.icon {
+	display: none;
+}
+
+@media screen and (max-width:680px) {
+	ul.topnav li:not=(:first-child) {
+	display:none;
+}
+
+ul.topnav li.icon {
+	float: right;
+	display: inline-block;
+}
+
+}
+@media screen and (max-width:680px) {
+	ul.topnav.responsive {
+		position: relative;
+	}
+	ul.topnav.responsive li.icon {
+		position: absolute;
+		right: 0;
+		top: 0;
+	}
+	ul.topnav.responsive li {
+		float: none;
+		display: inline;
+	}
+	ul.topnav.responsive li a {
+		display: block;
+		text-align: left;
+	}
+}
+</style>
+<script>
+	function myFunction() {
+		var x = document.getElementById("myTopnav");
+		if (x.className === "topnav") {
+			x.className += " responsive";
+		} else {
+			x.className = "topnav";
+		}
+	}
+</script>
+<script type="text/javascript">
+	function getUrl(search) {
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4) {
+				var responseJson = eval('(' + xhr.responseText + ')');
+				var url = responseJson.responseData.results[0].unescapedUrl;
+				var link = document.getElementById('linkId');
+				link.href = link.firstChild.nodeValue = url;
+				link.onclick = null;
+			}
+		}
+		var google = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&amp;q=";
+		xhr.open('GET', google + search, true);
+		xhr.send(null);
+	}
+</script>
+<script type="text/javascript" src="webjars/jquery/2.2.4/jquery.min.js"></script>
+
+<script type="text/javascript" src="js/main.js"></script>
+</head>
+<header>
+	<hr class="style-three"></hr>
+	<div>
+		<h1 class="neon">Server-Sent Event Application</h1>
+	</div>
+	<hr></hr>
+</header>
+<body>
+	<div id="quote"></div>
+	
+</body>
+<footer>
+	<hr style=""></hr>
+	<span id="footertext">&#169; Anand Sivadas. 2018. All rights reserved</span>
+</footer>
+
+<script>
+
+  /**
+   * AJAX Helpers.
+   */
+
+  var xhr = function(url) {
+    return new Promise(function(resolve, reject) {
+      try {
+        var xmhr = new XMLHttpRequest();
+
+        //Listen for API Response
+        xmhr.onreadystatechange = function() {
+          if (xmhr.readyState == XMLHttpRequest.DONE && xmhr.status == 200) return resolve(xmhr.responseText);
+        };
+
+        //Open connection
+        xmhr.open("GET", url, true);
+        //Additional headers as needed
+        //x.withCredentials = true;
+        //x.setRequestHeader("Accept", "application/json");
+        //x.setRequestHeader("Content-Type", "text/plain");
+
+        //Perform the actual AJAX call
+        xmhr.send();
+
+      } catch (ex) {
+        reject("Exception: Oh CORS's you've made a mistake!");
+      }
+    });
+  };
+
+  /**
+   * SSE
+   */
+
+  var sse = new EventSource('http://localhost:31031/sse');
+  sse.onmessage = function (evt) {
+    var el = document.getElementById('quote');
+    el.appendChild(document.createTextNode(evt.data));
+    el.appendChild(document.createElement('br'))
+  };
+
+</script>
+</html>
